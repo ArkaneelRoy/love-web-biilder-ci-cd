@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOVE-12 // Fantasy Console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="console-chassis">
+    <!-- Top Hardware Bar -->
+    <header class="cart-header">
+      <div class="cart-title">
+        <span class="pixel-icon" aria-hidden="true"></span>
+        <span>LOVE-12</span>
+        <span class="cart-badge">WASM CART</span>
+      </div>
+      <div class="header-actions">
+        <button id="runBtn" class="px-btn px-btn-run">▶ BOOT CART</button>
+      </div>
+    </header>
+
+    <!-- Main Split Deck: Left = Code Cart, Right = CRT Display -->
+    <main class="console-deck">
+      <!-- Module 01: Code Editor with Overlaid Syntax Highlighting -->
+      <section class="module-box">
+        <div class="module-strip">
+          <span>[01] MAIN.LUA</span>
+          <span class="tag">LUA 5.1</span>
+        </div>
+        <div class="editor-wrap">
+          <!-- Bottom visual layer: renders colored <span> tokens -->
+          <pre id="highlightLayer" class="editor-layer" aria-hidden="true"><code id="highlightCode"></code></pre>
+          <!-- Top interactive layer: transparent text with visible cursor -->
+          <textarea id="code" class="editor-layer" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off">-- CART: 3D ROTATING CUBES
+-- DRAG / ARROWS / WASD TO SPIN
+
+local cubes = {}
+local angleX, angleY = 0.45, 0.65
+local autoSpin = true
+
+local unitVertices = {
+  {-1, -1, -1}, { 1, -1, -1}, { 1,  1, -1}, {-1,  1, -1},
+  {-1, -1,  1}, { 1, -1,  1}, { 1,  1,  1}, {-1,  1,  1}
+}
+
+local edges = {
+  {1,2}, {2,3}, {3,4}, {4,1},
+  {5,6}, {6,7}, {7,8}, {8,5},
+  {1,5}, {2,6}, {3,7}, {4,8}
+}
+
+function love.load()
+  cubes = {
+    { scale = 1.35, speedX =  0.55, speedY =  0.80, color = {0.45, 0.85, 0.79}, width = 2 },
+    { scale = 0.80, speedX = -0.90, speedY =  1.15, color = {0.78, 0.57, 0.92}, width = 2 },
+    { scale = 0.40, speedX =  1.40, speedY = -1.30, color = {1.00, 0.42, 0.55}, width = 2 }
+  }
+end
+
+local function project(vx, vy, vz, ax, ay, scale, cx, cy, fov)
+  local cosY, sinY = math.cos(ay), math.sin(ay)
+  local x1 = vx * cosY - vz * sinY
+  local z1 = vx * sinY + vz * cosY
+
+  local cosX, sinX = math.cos(ax), math.sin(ax)
+  local y2 = vy * cosX - z1 * sinX
+  local z2 = vy * sinX + z1 * cosX
+
+  local depth = 4.2 + z2 * scale
+  local factor = fov / math.max(0.2, depth)
+  return cx + (x1 * scale) * factor, cy + (y2 * scale) * factor
+end
+
+function love.update(dt)
+  if love.keyboard.isDown("left", "a")  then angleY = angleY - 2.2 * dt; autoSpin = false end
+  if love.keyboard.isDown("right", "d") then angleY = angleY + 2.2 * dt; autoSpin = false end
+  if love.keyboard.isDown("up", "w")    then angleX = angleX - 2.2 * dt; autoSpin = false end
+  if love.keyboard.isDown("down", "s")  then angleX = angleX + 2.2 * dt; autoSpin = false end
+  if love.keyboard.isDown("space")      then autoSpin = true end
+
+  if autoSpin then
+    angleX = angleX + 0.65 * dt
+    angleY = angleY + 0.95 * dt
+  end
+end
+
+function love.mousemoved(x, y, dx, dy)
+  if love.mouse.isDown(1) then
+    autoSpin = false
+    angleY = angleY + dx * 0.012
+    angleX = angleX + dy * 0.012
+  end
+end
+
+function love.draw()
+  local w, h = love.graphics.getDimensions()
+  local cx, cy = w * 0.5, h * 0.5
+  local fov = math.min(w, h) * 0.72
+
+  love.graphics.clear(0.075, 0.071, 0.094)
+
+  for _, cube in ipairs(cubes) do
+    local projected = {}
+    local ax = angleX * cube.speedX
+    local ay = angleY * cube.speedY
+
+    for idx, v in ipairs(unitVertices) do
+      local sx, sy = project(v[1], v[2], v[3], ax, ay, cube.scale, cx, cy, fov)
+      projected[idx] = { x = sx, y = sy }
+    end
+
+    love.graphics.setLineWidth(cube.width)
+    love.graphics.setColor(cube.color[1], cube.color[2], cube.color[3], 0.95)
+    for _, edge in ipairs(edges) do
+      local p1, p2 = projected[edge[1]], projected[edge[2]]
+      love.graphics.line(p1.x, p1.y, p2.x, p2.y)
+    end
+
+    love.graphics.setColor(0.92, 0.90, 0.95, 1.0)
+    for _, p in ipairs(projected) do
+      love.graphics.rectangle("fill", p.x - 2, p.y - 2, 4, 4)
+    end
+  end
+
+  love.graphics.setColor(0.81, 0.79, 0.86)
+  love.graphics.print("FPS:" .. love.timer.getFPS() .. " // DRAG TO SPIN", 8, 8)
+end</textarea>
+        </div>
+      </section>
+
+      <!-- Module 02: Isolated WebGL/WASM Viewport -->
+      <section class="module-box">
+        <div class="module-strip">
+          <span>[02] DISPLAY</span>
+          <span class="tag">60HZ // GLES</span>
+        </div>
+        <div class="crt-bezel">
+          <!-- player.html iframes are dynamically injected and replaced here -->
+          <div id="frameContainer"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Dock: Serial Logs & Architecture Reference -->
+    <footer id="serialDock" class="serial-dock">
+      <div class="serial-bar">
+        <div class="tab-btns">
+          <button id="tabConsole" class="tab-btn active">SERIAL</button>
+          <button id="tabDocs" class="tab-btn">SPECS</button>
+        </div>
+        <div class="tab-btns">
+          <button id="clearLogBtn" class="tab-btn">CLR</button>
+          <button id="toggleDockBtn" class="tab-btn">_</button>
+        </div>
+      </div>
+      <div class="serial-body">
+        <pre id="consoleOutput">READY.</pre>
+        <div id="docsPanel">
+          <strong>[1. ZIP PACK]</strong> <code>zip.js</code> builds an uncompressed (STORE) <code>.love</code> archive with CRC-32 checksums in a raw <code>ArrayBuffer</code>.<br>
+          <strong>[2. SANDBOX]</strong> <code>app.js</code> destroys and recreates <code>player.html</code> inside an <code>&lt;iframe&gt;</code> on every boot to reset Emscripten's heap.<br>
+          <strong>[3. FS MOUNT]</strong> <code>player.js</code> hooks <code>Module.preRun</code> and calls <code>FS_createDataFile()</code> to mount <code>/game.love</code> before <code>love.js</code> executes.
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Load standalone ZIP builder first, then main application controller -->
+  <script src="zip.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
