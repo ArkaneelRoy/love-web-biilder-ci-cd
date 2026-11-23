@@ -27,7 +27,7 @@ jobs:
           git clone --recursive https://github.com/rozenmad/megasource-web.git src/megasource-web
           git clone --recursive https://github.com/rozenmad/love-web.git src/megasource-web/libs/love
 
-      - name: Configure and Build Compat Single-File
+            - name: Configure and Build Compat Single-File
         env:
           EMCC_CFLAGS: "-s SINGLE_FILE=1"
         run: |
@@ -36,8 +36,10 @@ jobs:
           emcmake cmake ../../src/megasource-web \
             -G "Unix Makefiles" \
             -DLOVE_JIT=0 \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           emmake make -j$(nproc)
+          
 
       - name: Package Output
         run: |
