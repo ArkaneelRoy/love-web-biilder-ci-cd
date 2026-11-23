@@ -71,10 +71,10 @@
     };
 
     // 3. Inject the single-file love.js runtime now that window.Module is ready
-    //const script = document.createElement('script');
-   // script.src = 'love.js';
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/gh/ArkaneelRoy/love.js@main/love.js';
 
-   /*** script.onload = async () => {
+   script.onload = async () => {
       // Support both MODULARIZE=1 factory builds (`Love(Module)`) and global builds
       if (typeof Love === 'function') {
         await Love(window.Module);
@@ -91,6 +91,6 @@
       }, '*');
     };
 
-    document.body.appendChild(script);**/
+    document.body.appendChild(script);
   });
 })();
