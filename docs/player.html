@@ -26,6 +26,17 @@
   <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
 
   <!-- Boot controller that receives the .love ArrayBuffer and loads love.js -->
+
+  <script>
+  window.Module = {
+    canvas: document.getElementById('canvas'),
+    arguments: ['/game.love'],
+    preRun: [function (mod) {
+      mod.FS_createDataFile('/', 'game.love', loveZipUint8Array, true, true, true);
+    }]
+  };
+  </script>
+  
   <script src="https://cdn.jsdelivr.net/gh/ArkaneelRoy/love.js@main/love.js"></script>
   <script src="player.js"></script>
 </body>
