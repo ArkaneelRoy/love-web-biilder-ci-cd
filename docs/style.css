@@ -1,0 +1,359 @@
+/* ==========================================================================
+   TAPIOCA THEME PALETTE & FANTASY CONSOLE LAYOUT
+   ========================================================================== */
+
+:root {
+  /* Core UI Surfaces */
+  --bg-primary:   #131218; /* Main canvas & editor background */
+  --bg-secondary: #1b1922; /* Hardware chassis modules */
+  --bg-selection: #2d293a; /* Active strips, buttons, & text selection */
+  --fg-primary:   #eae6f2; /* Primary crisp text */
+  --fg-muted:     #655f78; /* Comments & inactive labels */
+  --cursor:       #c792ea; /* Editor caret */
+
+  /* ANSI / Lua Syntax Accent Colors */
+  --red:          #ff6b8b;
+  --green:        #7ee787; /* Strings & Boot button */
+  --yellow:       #ffcb6b; /* Numbers & hardware tags */
+  --blue:         #7aa2f7; /* Function calls */
+  --magenta:      #c792ea; /* Lua keywords */
+  --cyan:         #73daca; /* LÖVE API namespace */
+  --white:        #cfc9dc;
+
+  /* Pixel Bevel Borders */
+  --border:       #2d293a;
+  --border-hi:    #423c54;
+  --shadow-dark:  #0b0a0e;
+
+  --font-pixel: ui-monospace, "Cascadia Code", "Fira Code", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  image-rendering: pixelated;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg-primary);
+  /* Subtle 8x8 pixel dot-matrix background */
+  background-image: radial-gradient(#221f2b 1px, transparent 1px);
+  background-size: 8px 8px;
+  color: var(--fg-primary);
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--bg-selection);
+  color: var(--fg-primary);
+}
+
+/* ==========================================================================
+   CONSOLE HARDWARE CHASSIS & TOP HEADER
+   ========================================================================== */
+
+.console-chassis {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px;
+  gap: 8px;
+}
+
+.cart-header {
+  height: 36px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  box-shadow: inset 0 2px 0 var(--border-hi), 0 3px 0 var(--shadow-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.cart-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Pure CSS 8x8 Pixel Heart Sprite rendered via box-shadow coordinates */
+.pixel-icon {
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  margin-right: 12px;
+  margin-bottom: 9px;
+  box-shadow:
+    3px 0 var(--red), 9px 0 var(--red),
+    0 3px var(--red), 3px 3px var(--magenta), 6px 3px var(--red), 9px 3px var(--red), 12px 3px var(--red),
+    0 6px var(--red), 3px 6px var(--red), 6px 6px var(--red), 9px 6px var(--red), 12px 6px var(--red),
+    3px 9px var(--red), 6px 9px var(--red), 9px 9px var(--red),
+    6px 12px var(--red);
+}
+
+.cart-badge {
+  background: var(--bg-primary);
+  border: 2px solid var(--border);
+  color: var(--cyan);
+  padding: 1px 6px;
+  font-size: 10px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Tactile Pixel Push Buttons */
+.px-btn {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border: 2px solid var(--shadow-dark);
+  background: var(--bg-selection);
+  color: var(--fg-primary);
+  box-shadow: inset 0 2px 0 var(--border-hi), 0 2px 0 var(--shadow-dark);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.px-btn:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 var(--border-hi);
+}
+
+.px-btn-run {
+  background: var(--green);
+  color: var(--bg-primary);
+  box-shadow: inset 0 2px 0 #a9f5b0, 0 2px 0 var(--shadow-dark);
+}
+
+.px-btn-run:active {
+  box-shadow: inset 0 1px 0 #a9f5b0;
+}
+
+/* ==========================================================================
+   SPLIT DECK (EDITOR | VIEWPORT)
+   ========================================================================== */
+
+.console-deck {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-height: 0;
+}
+
+@media (max-width: 780px) {
+  .console-deck {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+}
+
+.module-box {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  box-shadow: inset 0 2px 0 var(--border-hi), 0 3px 0 var(--shadow-dark);
+}
+
+.module-strip {
+  height: 24px;
+  background: var(--bg-selection);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.module-strip .tag {
+  color: var(--yellow);
+}
+
+/* ==========================================================================
+   OVERLAY SYNTAX HIGHLIGHTER
+   Both layers share identical font, padding, line-height, and scroll offsets.
+   ========================================================================== */
+
+.editor-wrap {
+  position: relative;
+  flex: 1;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.editor-layer {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 10px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  line-height: 1.5;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+  border: none;
+}
+
+#highlightLayer {
+  pointer-events: none;
+  color: var(--fg-primary);
+  z-index: 1;
+}
+
+#code {
+  z-index: 2;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--cursor);
+  resize: none;
+  outline: none;
+}
+
+#code::selection {
+  background: rgba(199, 146, 234, 0.28);
+  color: transparent;
+}
+
+/* Lua Token Highlight Classes */
+.tok-comment { color: var(--fg-muted); }
+.tok-string  { color: var(--green); }
+.tok-keyword { color: var(--magenta); font-weight: 700; }
+.tok-love    { color: var(--cyan); }
+.tok-func    { color: var(--blue); }
+.tok-number  { color: var(--yellow); }
+
+/* ==========================================================================
+   CRT VIEWPORT & BOTTOM SERIAL DOCK
+   ========================================================================== */
+
+.crt-bezel {
+  flex: 1;
+  padding: 6px;
+  background: #0d0c11;
+  display: flex;
+}
+
+#frameContainer {
+  flex: 1;
+  border: 2px solid var(--border);
+  background: #000;
+  position: relative;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.serial-dock {
+  height: 118px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  box-shadow: inset 0 2px 0 var(--border-hi), 0 3px 0 var(--shadow-dark);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.serial-dock.minimized {
+  height: 28px;
+}
+
+.serial-bar {
+  height: 24px;
+  background: var(--bg-selection);
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.tab-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.tab-btn {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: var(--bg-primary);
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.tab-btn.active {
+  background: var(--magenta);
+  color: var(--bg-primary);
+  border-color: var(--magenta);
+}
+
+.serial-body {
+  flex: 1;
+  background: var(--bg-primary);
+  padding: 8px 10px;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#consoleOutput {
+  margin: 0;
+  color: var(--white);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#docsPanel {
+  display: none;
+  color: var(--white);
+}
+
+#docsPanel code {
+  color: var(--cyan);
+  background: var(--bg-secondary);
+  padding: 0 4px;
+  border: 1px solid var(--border);
+}
+
+#docsPanel strong {
+  color: var(--yellow);
+}
