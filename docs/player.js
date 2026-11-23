@@ -71,8 +71,8 @@
     };
 
     // 3. Inject the single-file love.js runtime now that window.Module is ready
-    const script = document.createElement('script');
-    script.src = 'love.js';
+    //const script = document.createElement('script');
+   // script.src = 'love.js';
 
     script.onload = async () => {
       // Support both MODULARIZE=1 factory builds (`Love(Module)`) and global builds
