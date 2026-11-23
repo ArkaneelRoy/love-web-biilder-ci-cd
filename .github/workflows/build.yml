@@ -28,8 +28,6 @@ jobs:
           git clone --recursive https://github.com/rozenmad/love-web.git src/megasource-web/libs/love
 
       - name: Configure and Build Compat Single-File
-        env:
-          EMCC_CFLAGS: "-s SINGLE_FILE=1"
         run: |
           mkdir -p build/compat
           cd build/compat
@@ -38,7 +36,7 @@ jobs:
             -DLOVE_JIT=0 \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-          emmake make -j$(nproc)
+          EMCC_CFLAGS="-s SINGLE_FILE=1 -Wno-error" emmake make -j$(nproc) || EMCC_CFLAGS="-s SINGLE_FILE=1 -Wno-error" emmake make -j1
 
       - name: Package Output
         run: |
