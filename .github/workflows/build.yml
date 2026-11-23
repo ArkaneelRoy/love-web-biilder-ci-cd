@@ -1,0 +1,53 @@
+name: Build LÖVE 12.0 Single-File JS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-compat-singlefile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout love-web-builder
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten 4.0.10
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '4.0.10'
+
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake make python3
+
+      - name: Clone megasource-web and love-web
+        run: |
+          mkdir -p src
+          git clone --recursive https://github.com/rozenmad/megasource-web.git src/megasource-web
+          git clone --recursive https://github.com/rozenmad/love-web.git src/megasource-web/libs/love
+
+      - name: Configure and Build Compat Single-File
+        env:
+          EMCC_CFLAGS: "-s SINGLE_FILE=1"
+        run: |
+          mkdir -p build/compat
+          cd build/compat
+          emcmake cmake ../../src/megasource-web \
+            -G "Unix Makefiles" \
+            -DLOVE_JIT=0 \
+            -DCMAKE_BUILD_TYPE=Release
+          emmake make -j$(nproc)
+
+      - name: Package Output
+        run: |
+          rm -f lovejs_source/compat/love.wasm
+          cp build/compat/love/love.js* lovejs_source/compat/
+          ls -lh lovejs_source/compat/
+
+      - name: Upload Single-File Runtime Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: love12-compat-singlefile
+          path: lovejs_source/compat/
+          
